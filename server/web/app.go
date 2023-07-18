@@ -2,36 +2,43 @@ package web
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"paper-trader/db"
 )
 
 type App struct {
-	d        db.DB
-	handlers map[string]http.HandlerFunc
+	d      db.DB
+	router *mux.Router
 }
 
 func NewApp(d db.DB, cors bool) App {
 	app := App{
-		d:        d,
-		handlers: make(map[string]http.HandlerFunc),
+		d:      d,
+		router: mux.NewRouter(),
 	}
 	techHandler := app.GetTechnologies
 	if !cors {
-		techHandler = disableCors(techHandler)
+		app.router.Use(DisableCorsMiddleware)
 	}
-	app.handlers["/api/technologies"] = techHandler
-	app.handlers["/"] = http.FileServer(http.Dir("/webapp")).ServeHTTP
+	app.router.HandleFunc("/api/technologies", techHandler)
 	return app
 }
 
+func DisableCorsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (a *App) Serve() error {
-	for path, handler := range a.handlers {
-		http.Handle(path, handler)
-	}
 	log.Println("Web server is available on port 8080")
-	return http.ListenAndServe(":8080", nil)
+	return http.ListenAndServe(":8080", a.router)
 }
 
 func (a *App) GetTechnologies(w http.ResponseWriter, r *http.Request) {
@@ -50,14 +57,4 @@ func (a *App) GetTechnologies(w http.ResponseWriter, r *http.Request) {
 func sendErr(w http.ResponseWriter, code int, message string) {
 	resp, _ := json.Marshal(map[string]string{"error": message})
 	http.Error(w, string(resp), code)
-}
-
-// Needed in order to disable CORS for local development
-func disableCors(h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "*")
-		h(w, r)
-	}
 }
