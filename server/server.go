@@ -19,7 +19,8 @@ func main() {
 	cors := os.Getenv("profile") == "prod"
 
 	positionRepo := db.NewPositionRepo(d)
-	app := web.NewApp(db.NewDB(d), positionRepo, cors)
+	positionResource := web.NewPositionResource(positionRepo)
+	app := web.NewApp(db.NewDB(d), positionResource, cors)
 	err = app.Serve()
 	log.Println("Error", err)
 }
