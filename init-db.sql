@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS positions;
+DROP TABLE IF EXISTS technologies;
+
 CREATE TABLE positions
 (
     ticker    VARCHAR(255),

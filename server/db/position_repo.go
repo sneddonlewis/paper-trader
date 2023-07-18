@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"log"
 	"paper-trader/model"
 )
 
@@ -15,6 +16,7 @@ func NewPositionRepo(db *sql.DB) PositionRepo {
 
 func (repo *PositionRepo) GetPositions() ([]*model.Position, error) {
 	rows, err := repo.db.Query("select ticker, direction, price, quantity from positions")
+	log.Println(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -28,5 +30,6 @@ func (repo *PositionRepo) GetPositions() ([]*model.Position, error) {
 		}
 		positions = append(positions, position)
 	}
+	log.Println(positions)
 	return positions, nil
 }
