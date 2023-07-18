@@ -9,20 +9,23 @@ import (
 )
 
 type App struct {
-	d      db.DB
-	router *mux.Router
+	d            db.DB
+	positionRepo db.PositionRepo
+	router       *mux.Router
 }
 
-func NewApp(d db.DB, cors bool) App {
+func NewApp(d db.DB, positionRepo db.PositionRepo, cors bool) App {
 	app := App{
-		d:      d,
-		router: mux.NewRouter(),
+		d:            d,
+		positionRepo: positionRepo,
+		router:       mux.NewRouter(),
 	}
 	techHandler := app.GetTechnologies
 	if !cors {
 		app.router.Use(DisableCorsMiddleware)
 	}
 	app.router.HandleFunc("/api/technologies", techHandler)
+	app.router.HandleFunc("/api/positions", app.GetPositions)
 	return app
 }
 
@@ -39,6 +42,19 @@ func DisableCorsMiddleware(next http.Handler) http.Handler {
 func (a *App) Serve() error {
 	log.Println("Web server is available on port 8080")
 	return http.ListenAndServe(":8080", a.router)
+}
+
+func (a *App) GetPositions(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	positions, err := a.positionRepo.GetPositions()
+	if err != nil {
+		sendErr(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	err = json.NewEncoder(w).Encode(positions)
+	if err != nil {
+		sendErr(w, http.StatusInternalServerError, err.Error())
+	}
 }
 
 func (a *App) GetTechnologies(w http.ResponseWriter, r *http.Request) {

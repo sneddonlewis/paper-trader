@@ -1,3 +1,13 @@
+CREATE TABLE positions (
+    ticker VARCHAR(255),
+    direction VARCHAR(255),
+    price FLOAT,
+    quantity FLOAT
+);
+insert into positions values (
+    'EDV', 'long', 1892.0, 10.0
+);
+
 CREATE TABLE technologies (
   name    VARCHAR(255),
   details VARCHAR(255)
