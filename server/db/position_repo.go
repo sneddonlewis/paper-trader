@@ -53,3 +53,11 @@ func (repo *PositionRepo) GetPositionsByTicker(ticker string) ([]*model.Position
 	log.Println(positions)
 	return positions, nil
 }
+
+func (repo *PositionRepo) OpenPosition(p *model.Position) (*model.Position, error) {
+	_, err := repo.db.Exec("INSERT INTO positions VALUES (?, ?, ?)", p.Ticker, p.Price, p.Quantity)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
