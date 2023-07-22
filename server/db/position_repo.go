@@ -17,7 +17,7 @@ func NewPositionRepo(db *sql.DB) PositionRepo {
 }
 
 func (r *PositionRepo) GetOpenPositions() ([]*model.Position, error) {
-	rows, err := r.db.Query("SELECT id, ticker, price, quantity FROM positions WHERE close_price IS NULL")
+	rows, err := r.db.Query("SELECT id, ticker, price, quantity, opened_at FROM positions WHERE close_price IS NULL")
 	log.Println(rows)
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (r *PositionRepo) GetOpenPositions() ([]*model.Position, error) {
 	var positions []*model.Position
 	for rows.Next() {
 		position := new(model.Position)
-		err = rows.Scan(&position.ID, &position.Ticker, &position.Price, &position.Quantity)
+		err = rows.Scan(&position.ID, &position.Ticker, &position.Price, &position.Quantity, &position.OpenedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -55,9 +55,9 @@ func (r *PositionRepo) GetPositions() ([]*model.Position, error) {
 }
 
 func (r *PositionRepo) GetPositionById(id int32) (*model.Position, error) {
-	row := r.db.QueryRow("select id, ticker, price, quantity from positions WHERE id = $1", id)
+	row := r.db.QueryRow("select id, ticker, price, quantity, opened_at from positions WHERE id = $1", id)
 	position := new(model.Position)
-	err := row.Scan(&position.ID, &position.Ticker, &position.Price, &position.Quantity)
+	err := row.Scan(&position.ID, &position.Ticker, &position.Price, &position.Quantity, &position.OpenedAt)
 	if err != nil {
 		return nil, err
 	}
