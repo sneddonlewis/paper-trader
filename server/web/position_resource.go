@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"paper-trader/service"
-	"strings"
+	"strconv"
 )
 
 type PositionResource struct {
@@ -18,7 +18,7 @@ func NewPositionResource(tradeService *service.TradeService) *PositionResource {
 func (r *PositionResource) GetEndpoints() []Endpoint {
 	return []Endpoint{
 		{http.MethodGet, "/api/positions", r.GetPositions},
-		{http.MethodPost, "/api/position/:ticker/close", r.ClosePosition},
+		{http.MethodPost, "/api/position/:id/close", r.ClosePosition},
 	}
 }
 
@@ -32,8 +32,14 @@ func (r *PositionResource) GetPositions(c *gin.Context) {
 }
 
 func (r *PositionResource) ClosePosition(c *gin.Context) {
-	ticker := strings.ToUpper(c.Param("ticker"))
-	closingPosition, err := r.tradeService.ClosePosition(ticker)
+	idStr := c.Param("id")
+	id64, err := strconv.Atoi(idStr)
+	if err != nil {
+		SendErr(c, http.StatusBadRequest, "Invalid ID provided")
+		return
+	}
+	id := int32(id64)
+	closingPosition, err := r.tradeService.ClosePosition(id)
 	if err != nil {
 		SendErr(c, http.StatusInternalServerError, err.Error())
 		return

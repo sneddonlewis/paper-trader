@@ -19,10 +19,23 @@ func NewTradeService(positionRepo db.PositionRepo, pricing PricingService) *Trad
 }
 
 func (s *TradeService) AllPositions() ([]*model.Position, error) {
-	return s.positionRepo.GetPositions()
+	return s.positionRepo.GetOpenPositions()
 }
 
-func (s *TradeService) ClosePosition(ticker string) (*model.Position, error) {
+func (s *TradeService) ClosePosition(id int32) (*model.ClosedPosition, error) {
+	p, err := s.positionRepo.GetPositionById(id)
+	if err != nil {
+		return nil, err
+	}
+	price := s.pricing.GetSimplePrice(p.Ticker)
+	position, err := s.positionRepo.ClosePosition(id, price)
+	if err != nil {
+		return nil, err
+	}
+	return position, nil
+}
+
+func (s *TradeService) ClosePositions(ticker string) (*model.Position, error) {
 	positions, err := s.positionRepo.GetPositionsByTicker(ticker)
 	if err != nil {
 		return nil, err

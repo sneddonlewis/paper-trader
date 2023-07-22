@@ -5,7 +5,8 @@ CREATE TABLE positions
     id        SERIAL PRIMARY KEY,
     ticker    VARCHAR(255),
     price     DOUBLE PRECISION,
-    quantity  DOUBLE PRECISION
+    quantity  DOUBLE PRECISION,
+    close_price DOUBLE PRECISION
 );
 
 INSERT INTO positions (ticker, price, quantity)
