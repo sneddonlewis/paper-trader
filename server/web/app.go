@@ -1,8 +1,7 @@
 package web
 
 import (
-	"encoding/json"
-	"github.com/go-chi/chi"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"paper-trader/db"
@@ -11,18 +10,24 @@ import (
 type App struct {
 	d                db.DB
 	positionResource Resource
-	router           chi.Router
+	router           *gin.Engine
 }
 
 type Resource interface {
-	Handlers() map[string]http.HandlerFunc
+	GetEndpoints() []Endpoint
+}
+
+type Endpoint struct {
+	Method  string
+	Route   string
+	Handler gin.HandlerFunc
 }
 
 func NewApp(d db.DB, resource Resource, cors bool) App {
 	app := App{
 		d:                d,
 		positionResource: resource,
-		router:           chi.NewRouter(),
+		router:           gin.Default(),
 	}
 	// app should have an array of pointer to resource objects
 	// each should be the interface with Handlers() map[string]http.HandleFunc
@@ -31,44 +36,38 @@ func NewApp(d db.DB, resource Resource, cors bool) App {
 	if !cors {
 		app.router.Use(DisableCorsMiddleware)
 	}
-	for key, value := range app.positionResource.Handlers() {
-		app.router.HandleFunc(key, value)
+	for _, endpoint := range app.positionResource.GetEndpoints() {
+		app.router.Handle(endpoint.Method, endpoint.Route, endpoint.Handler)
 	}
-	app.router.HandleFunc("/api/technologies", techHandler)
-
-	app.router.Handle("/*", http.StripPrefix("/", http.FileServer(http.Dir("/webapp"))))
+	app.router.Handle(http.MethodGet, "/api/technologies", techHandler)
+	app.router.NoRoute(func(c *gin.Context) {
+		c.File("/webapp/index.html")
+	})
 	return app
 }
 
-func DisableCorsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-		next.ServeHTTP(w, r)
-	})
+func DisableCorsMiddleware(c *gin.Context) {
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	c.Next()
 }
 
 func (a *App) Serve() error {
 	log.Println("Web server is available on port 8080")
-	return http.ListenAndServe(":8080", a.router)
+	return a.router.Run(":8080")
 }
 
-func (a *App) GetTechnologies(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func (a *App) GetTechnologies(c *gin.Context) {
+	c.Header("Content-Type", "application/json")
 	technologies, err := a.d.GetTechnologies()
 	if err != nil {
-		SendErr(w, http.StatusInternalServerError, err.Error())
+		SendErr(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	err = json.NewEncoder(w).Encode(technologies)
-	if err != nil {
-		SendErr(w, http.StatusInternalServerError, err.Error())
-	}
+	c.JSON(http.StatusOK, technologies)
 }
 
-func SendErr(w http.ResponseWriter, code int, message string) {
-	resp, _ := json.Marshal(map[string]string{"error": message})
-	http.Error(w, string(resp), code)
+func SendErr(c *gin.Context, status int, message string) {
+	c.JSON(status, gin.H{"error": message})
 }

@@ -1,7 +1,7 @@
 package web
 
 import (
-	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"paper-trader/db"
 )
@@ -14,21 +14,23 @@ func NewPositionResource(repo db.PositionRepo) *PositionResource {
 	return &PositionResource{repo: repo}
 }
 
-func (resource *PositionResource) Handlers() map[string]http.HandlerFunc {
-	return map[string]http.HandlerFunc{
+func (resource *PositionResource) GetEndpoints() []Endpoint {
+	return []Endpoint{
+		{http.MethodGet, "/api/positions", resource.GetPositions},
+	}
+}
+
+func (resource *PositionResource) Handlers() map[string]gin.HandlerFunc {
+	return map[string]gin.HandlerFunc{
 		"/api/positions": resource.GetPositions,
 	}
 }
 
-func (resource *PositionResource) GetPositions(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func (resource *PositionResource) GetPositions(c *gin.Context) {
 	positions, err := resource.repo.GetPositions()
 	if err != nil {
-		SendErr(w, http.StatusInternalServerError, err.Error())
+		SendErr(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	err = json.NewEncoder(w).Encode(positions)
-	if err != nil {
-		SendErr(w, http.StatusInternalServerError, err.Error())
-	}
+	c.JSON(http.StatusOK, positions)
 }
