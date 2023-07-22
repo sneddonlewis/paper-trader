@@ -2,7 +2,7 @@ package web
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"log"
 	"net/http"
 	"paper-trader/db"
@@ -11,7 +11,7 @@ import (
 type App struct {
 	d                db.DB
 	positionResource Resource
-	router           *mux.Router
+	router           chi.Router
 }
 
 type Resource interface {
@@ -22,7 +22,7 @@ func NewApp(d db.DB, resource Resource, cors bool) App {
 	app := App{
 		d:                d,
 		positionResource: resource,
-		router:           mux.NewRouter(),
+		router:           chi.NewRouter(),
 	}
 	// app should have an array of pointer to resource objects
 	// each should be the interface with Handlers() map[string]http.HandleFunc
@@ -35,6 +35,8 @@ func NewApp(d db.DB, resource Resource, cors bool) App {
 		app.router.HandleFunc(key, value)
 	}
 	app.router.HandleFunc("/api/technologies", techHandler)
+
+	app.router.Handle("/*", http.StripPrefix("/", http.FileServer(http.Dir("/webapp"))))
 	return app
 }
 
