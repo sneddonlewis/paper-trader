@@ -38,7 +38,6 @@ func (r *PositionRepo) GetOpenPositions() ([]*model.Position, error) {
 
 func (r *PositionRepo) GetPositions() ([]*model.Position, error) {
 	rows, err := r.db.Query("select id, ticker, price, quantity from positions")
-	log.Println(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +51,6 @@ func (r *PositionRepo) GetPositions() ([]*model.Position, error) {
 		}
 		positions = append(positions, position)
 	}
-	log.Println(positions)
 	return positions, nil
 }
 
@@ -91,7 +89,12 @@ func (r *PositionRepo) OpenPosition(p *model.Position) (*model.Position, error) 
 		return nil, errors.New("cannot open position of quantity 0.0")
 	}
 	p.Ticker = strings.ToUpper(p.Ticker)
-	row := r.db.QueryRow("INSERT INTO positions (ticker, price, quantity) VALUES ($1, $2, $3) RETURNING id", p.Ticker, p.Price, p.Quantity)
+	row := r.db.QueryRow(
+		"INSERT INTO positions (ticker, price, quantity) VALUES ($1, $2, $3) RETURNING id",
+		p.Ticker,
+		p.Price,
+		p.Quantity,
+	)
 	err := row.Scan(&p.ID)
 	if err != nil {
 		return nil, err
@@ -100,9 +103,19 @@ func (r *PositionRepo) OpenPosition(p *model.Position) (*model.Position, error) 
 }
 
 func (r *PositionRepo) ClosePosition(id int32, closePrice float64) (*model.ClosedPosition, error) {
-	row := r.db.QueryRow("UPDATE positions SET close_price = $1 WHERE id = $2 RETURNING id, ticker, price, quantity, close_price", closePrice, id)
+	row := r.db.QueryRow(
+		"UPDATE positions SET close_price = $1 WHERE id = $2 RETURNING id, ticker, price, quantity, close_price",
+		closePrice,
+		id,
+	)
 	closedPosition := new(model.ClosedPosition)
-	err := row.Scan(&closedPosition.ID, &closedPosition.Ticker, &closedPosition.Price, &closedPosition.Quantity, &closedPosition.ClosePrice)
+	err := row.Scan(
+		&closedPosition.ID,
+		&closedPosition.Ticker,
+		&closedPosition.Price,
+		&closedPosition.Quantity,
+		&closedPosition.ClosePrice,
+	)
 	if err != nil {
 		return nil, err
 	}
