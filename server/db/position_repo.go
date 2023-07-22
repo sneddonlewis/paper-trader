@@ -90,12 +90,12 @@ func (r *PositionRepo) OpenPosition(p *model.Position) (*model.Position, error) 
 	}
 	p.Ticker = strings.ToUpper(p.Ticker)
 	row := r.db.QueryRow(
-		"INSERT INTO positions (ticker, price, quantity) VALUES ($1, $2, $3) RETURNING id",
+		"INSERT INTO positions (ticker, price, quantity) VALUES ($1, $2, $3) RETURNING id, opened_at",
 		p.Ticker,
 		p.Price,
 		p.Quantity,
 	)
-	err := row.Scan(&p.ID)
+	err := row.Scan(&p.ID, &p.OpenedAt)
 	if err != nil {
 		return nil, err
 	}
