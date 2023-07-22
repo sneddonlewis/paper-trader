@@ -104,7 +104,7 @@ func (r *PositionRepo) OpenPosition(p *model.Position) (*model.Position, error) 
 
 func (r *PositionRepo) ClosePosition(id int32, closePrice float64) (*model.ClosedPosition, error) {
 	row := r.db.QueryRow(
-		"UPDATE positions SET close_price = $1 WHERE id = $2 RETURNING id, ticker, price, quantity, close_price",
+		"UPDATE positions SET close_price = $1, closed_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id, ticker, price, quantity, close_price, closed_at",
 		closePrice,
 		id,
 	)
@@ -115,6 +115,7 @@ func (r *PositionRepo) ClosePosition(id int32, closePrice float64) (*model.Close
 		&closedPosition.Price,
 		&closedPosition.Quantity,
 		&closedPosition.ClosePrice,
+		&closedPosition.ClosedAt,
 	)
 	if err != nil {
 		return nil, err
