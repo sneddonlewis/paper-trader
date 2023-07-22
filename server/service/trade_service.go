@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"paper-trader/db"
 	"paper-trader/model"
 )
@@ -27,9 +28,12 @@ func (s *TradeService) ClosePosition(ticker string) (*model.Position, error) {
 		return nil, err
 	}
 	exp := exposure(positions)
+	if exp == 0.0 {
+		return nil, fmt.Errorf("no open positions to close for ticker %v", ticker)
+	}
 	createModel := model.Position{
 		Ticker:   ticker,
-		Price:    100.0,
+		Price:    s.pricing.GetSimplePrice(ticker),
 		Quantity: exp * -1,
 	}
 	closingPosition, _ := s.positionRepo.OpenPosition(&createModel)

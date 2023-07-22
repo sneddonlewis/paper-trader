@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"paper-trader/model"
 )
@@ -55,6 +56,9 @@ func (repo *PositionRepo) GetPositionsByTicker(ticker string) ([]*model.Position
 }
 
 func (repo *PositionRepo) OpenPosition(p *model.Position) (*model.Position, error) {
+	if p.Quantity == 0.0 {
+		return nil, errors.New("cannot open position of quantity 0.0")
+	}
 	_, err := repo.db.Exec("INSERT INTO positions VALUES (?, ?, ?)", p.Ticker, p.Price, p.Quantity)
 	if err != nil {
 		return nil, err
