@@ -20,7 +20,10 @@ func main() {
 
 	positionRepo := db.NewPositionRepo(d)
 	positionResource := web.NewPositionResource(positionRepo)
-	app := web.NewApp(db.NewDB(d), positionResource, cors)
+	resources := []web.Resource{
+		positionResource,
+	}
+	app := web.NewApp(db.NewDB(d), resources, cors)
 	err = app.Serve()
 	log.Println("Error", err)
 }
