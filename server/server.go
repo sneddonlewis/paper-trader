@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"paper-trader/db"
+	"paper-trader/service"
 	"paper-trader/web"
 )
 
@@ -19,7 +20,8 @@ func main() {
 	cors := os.Getenv("profile") == "prod"
 
 	positionRepo := db.NewPositionRepo(d)
-	positionResource := web.NewPositionResource(positionRepo)
+	tradeService := service.NewTradeService(positionRepo, service.PricingService{})
+	positionResource := web.NewPositionResource(tradeService)
 	resources := []web.Resource{
 		positionResource,
 	}

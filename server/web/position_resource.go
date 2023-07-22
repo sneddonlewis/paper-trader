@@ -3,17 +3,17 @@ package web
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"paper-trader/db"
 	"paper-trader/model"
+	"paper-trader/service"
 	"strings"
 )
 
 type PositionResource struct {
-	repo db.PositionRepo
+	tradeService *service.TradeService
 }
 
-func NewPositionResource(repo db.PositionRepo) *PositionResource {
-	return &PositionResource{repo: repo}
+func NewPositionResource(tradeService *service.TradeService) *PositionResource {
+	return &PositionResource{tradeService: tradeService}
 }
 
 func (r *PositionResource) GetEndpoints() []Endpoint {
@@ -24,7 +24,7 @@ func (r *PositionResource) GetEndpoints() []Endpoint {
 }
 
 func (r *PositionResource) GetPositions(c *gin.Context) {
-	positions, err := r.repo.GetPositions()
+	positions, err := r.tradeService.AllPositions()
 	if err != nil {
 		SendErr(c, http.StatusInternalServerError, err.Error())
 		return
@@ -34,7 +34,7 @@ func (r *PositionResource) GetPositions(c *gin.Context) {
 
 func (r *PositionResource) ClosePosition(c *gin.Context) {
 	ticker := strings.ToUpper(c.Param("ticker"))
-	positions, err := r.repo.GetPositions()
+	positions, err := r.tradeService.AllPositions()
 	if err != nil {
 		SendErr(c, http.StatusInternalServerError, err.Error())
 		return
