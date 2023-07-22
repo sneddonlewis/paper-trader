@@ -42,10 +42,9 @@ func (r *PositionResource) ClosePosition(c *gin.Context) {
 	positions = withTicker(positions, ticker)
 	exp := exposure(positions)
 	closingPosition := r.openPosition(model.Position{
-		Ticker:    ticker,
-		Direction: "short",
-		Price:     100.0,
-		Quantity:  exp * -1,
+		Ticker:   ticker,
+		Price:    100.0,
+		Quantity: exp * -1,
 	})
 	c.JSON(http.StatusOK, closingPosition)
 }

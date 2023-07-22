@@ -12,6 +12,9 @@ func NewApp(d db.DB, resources []Resource, cors bool) App {
 		resources: resources,
 		router:    gin.Default(),
 	}
+	if !cors {
+		app.router.Use(DisableCorsMiddleware)
+	}
 
 	for _, resource := range app.resources {
 		for _, endpoint := range resource.GetEndpoints() {

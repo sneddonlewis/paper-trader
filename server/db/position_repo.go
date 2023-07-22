@@ -15,7 +15,7 @@ func NewPositionRepo(db *sql.DB) PositionRepo {
 }
 
 func (repo *PositionRepo) GetPositions() ([]*model.Position, error) {
-	rows, err := repo.db.Query("select ticker, direction, price, quantity from positions")
+	rows, err := repo.db.Query("select ticker, price, quantity from positions")
 	log.Println(rows)
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func (repo *PositionRepo) GetPositions() ([]*model.Position, error) {
 	var positions []*model.Position
 	for rows.Next() {
 		position := new(model.Position)
-		err = rows.Scan(&position.Ticker, &position.Direction, &position.Price, &position.Quantity)
+		err = rows.Scan(&position.Ticker, &position.Price, &position.Quantity)
 		if err != nil {
 			return nil, err
 		}

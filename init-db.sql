@@ -4,16 +4,15 @@ DROP TABLE IF EXISTS technologies;
 CREATE TABLE positions
 (
     ticker    VARCHAR(255),
-    direction VARCHAR(255),
     price     FLOAT,
     quantity  FLOAT
 );
 insert into positions
-values ('EDV', 'long', 1892.0, 10.0);
+values ('EDV', 1892.0, 10.0);
 insert into positions
-values ('SDR', 'long', 440.55, 10.0);
+values ('SDR', 440.55, 10.0);
 insert into positions
-values ('ABDN', 'long', 222.5, 10.0);
+values ('ABDN', 222.5, -10.0);
 
 CREATE TABLE technologies
 (
