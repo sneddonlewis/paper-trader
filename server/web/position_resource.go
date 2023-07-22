@@ -3,6 +3,7 @@ package web
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"paper-trader/model"
 	"paper-trader/service"
 	"strconv"
 )
@@ -19,6 +20,7 @@ func (r *PositionResource) GetEndpoints() []Endpoint {
 	return []Endpoint{
 		{http.MethodGet, "/api/positions", r.GetPositions},
 		{http.MethodPost, "/api/position/:id/close", r.ClosePosition},
+		{http.MethodPost, "/api/position", r.OpenPosition},
 	}
 }
 
@@ -29,6 +31,21 @@ func (r *PositionResource) GetPositions(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, positions)
+}
+
+func (r *PositionResource) OpenPosition(c *gin.Context) {
+	var requestModel model.OpenPositionRequest
+	if err := c.BindJSON(&requestModel); err != nil {
+		SendErr(c, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	opened, err := r.tradeService.OpenPosition(&requestModel)
+	if err != nil {
+		SendErr(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, opened)
 }
 
 func (r *PositionResource) ClosePosition(c *gin.Context) {

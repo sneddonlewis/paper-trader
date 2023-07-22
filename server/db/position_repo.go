@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"paper-trader/model"
+	"strings"
 )
 
 type PositionRepo struct {
@@ -89,7 +90,8 @@ func (r *PositionRepo) OpenPosition(p *model.Position) (*model.Position, error) 
 	if p.Quantity == 0.0 {
 		return nil, errors.New("cannot open position of quantity 0.0")
 	}
-	row := r.db.QueryRow("INSERT INTO positions VALUES (?, ?, ?) RETURNING id", p.Ticker, p.Price, p.Quantity)
+	p.Ticker = strings.ToUpper(p.Ticker)
+	row := r.db.QueryRow("INSERT INTO positions (ticker, price, quantity) VALUES ($1, $2, $3) RETURNING id", p.Ticker, p.Price, p.Quantity)
 	err := row.Scan(&p.ID)
 	if err != nil {
 		return nil, err
