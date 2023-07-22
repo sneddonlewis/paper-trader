@@ -6,7 +6,9 @@ CREATE TABLE positions
     ticker    VARCHAR(255),
     price     DOUBLE PRECISION,
     quantity  DOUBLE PRECISION,
-    close_price DOUBLE PRECISION
+    close_price DOUBLE PRECISION,
+    opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    closed_at   TIMESTAMP
 );
 
 INSERT INTO positions (ticker, price, quantity)

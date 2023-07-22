@@ -37,7 +37,7 @@ func (r *PositionRepo) GetOpenPositions() ([]*model.Position, error) {
 }
 
 func (r *PositionRepo) GetPositions() ([]*model.Position, error) {
-	rows, err := r.db.Query("select id, ticker, price, quantity from positions")
+	rows, err := r.db.Query("select id, ticker, price, quantity, opened_at from positions")
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (r *PositionRepo) GetPositions() ([]*model.Position, error) {
 	var positions []*model.Position
 	for rows.Next() {
 		position := new(model.Position)
-		err = rows.Scan(&position.ID, &position.Ticker, &position.Price, &position.Quantity)
+		err = rows.Scan(&position.ID, &position.Ticker, &position.Price, &position.Quantity, &position.OpenedAt)
 		if err != nil {
 			return nil, err
 		}

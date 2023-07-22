@@ -1,6 +1,6 @@
 <ul>
   <li *ngFor="let position of positions">
-    <b>{{ position.ticker }}</b>: <i>placeholder for timestamp</i>
+    <b>{{ position.ticker }}</b>: <i>{{ position['opened-at'] }}</i>
     <p>Direction: {{ position.quantity < 0 ? 'short' : 'long' }}</p>
     <p>Price: {{ position.price }}</p>
     <p>Quantity: {{ position.quantity < 0 ? position.quantity * -1 : position.quantity }}</p>
