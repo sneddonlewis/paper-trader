@@ -3,7 +3,6 @@ package web
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"paper-trader/model"
 	"paper-trader/service"
 	"strings"
 )
@@ -34,39 +33,10 @@ func (r *PositionResource) GetPositions(c *gin.Context) {
 
 func (r *PositionResource) ClosePosition(c *gin.Context) {
 	ticker := strings.ToUpper(c.Param("ticker"))
-	positions, err := r.tradeService.AllPositions()
+	closingPosition, err := r.tradeService.ClosePosition(ticker)
 	if err != nil {
 		SendErr(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	positions = withTicker(positions, ticker)
-	exp := exposure(positions)
-	closingPosition := r.openPosition(model.Position{
-		Ticker:   ticker,
-		Price:    100.0,
-		Quantity: exp * -1,
-	})
 	c.JSON(http.StatusOK, closingPosition)
-}
-
-func (r *PositionResource) openPosition(position model.Position) model.Position {
-	return position
-}
-
-func exposure(positions []*model.Position) float64 {
-	amount := 0.0
-	for _, position := range positions {
-		amount = amount + position.Quantity
-	}
-	return amount
-}
-
-func withTicker(positions []*model.Position, ticker string) []*model.Position {
-	var result []*model.Position
-	for _, position := range positions {
-		if position.Ticker == ticker {
-			result = append(result, position)
-		}
-	}
-	return result
 }
