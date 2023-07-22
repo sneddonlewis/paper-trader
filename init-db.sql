@@ -1,28 +1,14 @@
 DROP TABLE IF EXISTS positions;
-DROP TABLE IF EXISTS technologies;
 
 CREATE TABLE positions
 (
+    id        SERIAL PRIMARY KEY,
     ticker    VARCHAR(255),
-    price     FLOAT,
-    quantity  FLOAT
+    price     DOUBLE PRECISION,
+    quantity  DOUBLE PRECISION
 );
-insert into positions
-values ('EDV', 1892.0, 10.0);
-insert into positions
-values ('SDR', 440.55, 10.0);
-insert into positions
-values ('ABDN', 222.5, -10.0);
 
-CREATE TABLE technologies
-(
-    name    VARCHAR(255),
-    details VARCHAR(255)
-);
-insert into technologies
-values ('Go', 'An open source programming language that makes it easy to build simple and efficient software.');
-insert into technologies
-values ('JavaScript',
-        'A lightweight, interpreted, or just-in-time compiled programming language with first-class functions.');
-insert into technologies
-values ('MySQL', 'A powerful, open source object-relational database');
+INSERT INTO positions (ticker, price, quantity)
+VALUES ('EDV', 1892.0, 10.0),
+       ('SDR', 440.55, 10.0),
+       ('ABDN', 222.5, -10.0);

@@ -9,14 +9,18 @@ services:
       - db
     environment:
       profile: prod
+      db_host: db
+      db_port: 5432
+      db_name: goxygen
+      db_user: goxygen
       db_pass: pass
+
   db:
-    image: mysql:8.0.31
+    image: postgres:latest
     container_name: db
     environment:
-      MYSQL_DATABASE: goxygen
-      MYSQL_USER: goxygen
-      MYSQL_PASSWORD: pass
-      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      POSTGRES_DB: goxygen
+      POSTGRES_USER: goxygen
+      POSTGRES_PASSWORD: pass
     volumes:
       - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql

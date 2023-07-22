@@ -1,13 +1,12 @@
 version: "3.8"
 services:
   dev_db:
-    image: mysql:8.0.31
+    image: postgres:latest
     environment:
-      MYSQL_DATABASE: goxygen
-      MYSQL_USER: goxygen
-      MYSQL_PASSWORD: pass
-      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      POSTGRES_DB: goxygen
+      POSTGRES_USER: goxygen
+      POSTGRES_PASSWORD: pass
     ports:
-      - 3306:3306
+      - 5432:5432
     volumes:
       - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql

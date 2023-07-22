@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	"log"
 	"os"
 	"paper-trader/db"
@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	d, err := sql.Open("mysql", dataSource())
+	d, err := sql.Open("postgres", dataSource())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,7 +29,6 @@ func main() {
 	err = app.Serve()
 	log.Println("Error", err)
 }
-
 func dataSource() string {
 	host := "localhost"
 	pass := "pass"
@@ -37,5 +36,5 @@ func dataSource() string {
 		host = "db"
 		pass = os.Getenv("db_pass")
 	}
-	return "goxygen:" + pass + "@tcp(" + host + ":3306)/goxygen"
+	return "host=" + host + " user=goxygen password=" + pass + " dbname=goxygen sslmode=disable"
 }
