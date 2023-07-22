@@ -18,6 +18,7 @@ func NewApp(d db.DB, resources []Resource, cors bool) App {
 			app.router.Handle(endpoint.Method, endpoint.Route, endpoint.Handler)
 		}
 	}
+	log.Println(app.router)
 
 	return app
 }
