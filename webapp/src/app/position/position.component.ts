@@ -17,5 +17,9 @@ export class PositionComponent implements OnInit {
       .subscribe(result => this.positions = result);
   }
 
+  closePositionHandler(id: number) {
+    this.positionService.closePosition(id)
+      .subscribe(res => console.log(res))
+  }
 
 }

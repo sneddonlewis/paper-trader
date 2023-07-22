@@ -4,5 +4,6 @@
     <p>Direction: {{ position.quantity < 0 ? 'short' : 'long' }}</p>
     <p>Price: {{ position.price }}</p>
     <p>Quantity: {{ position.quantity < 0 ? position.quantity * -1 : position.quantity }}</p>
+    <button (click)="closePositionHandler(position.id)">Close Position</button>
   </li>
 </ul>
