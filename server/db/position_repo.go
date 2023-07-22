@@ -15,6 +15,26 @@ func NewPositionRepo(db *sql.DB) PositionRepo {
 	return PositionRepo{db: db}
 }
 
+func (r *PositionRepo) GetOpenPositions() ([]*model.Position, error) {
+	rows, err := r.db.Query("SELECT id, ticker, price, quantity FROM positions WHERE close_price IS NULL")
+	log.Println(rows)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var positions []*model.Position
+	for rows.Next() {
+		position := new(model.Position)
+		err = rows.Scan(&position.ID, &position.Ticker, &position.Price, &position.Quantity)
+		if err != nil {
+			return nil, err
+		}
+		positions = append(positions, position)
+	}
+	log.Println(positions)
+	return positions, nil
+}
+
 func (r *PositionRepo) GetPositions() ([]*model.Position, error) {
 	rows, err := r.db.Query("select id, ticker, price, quantity from positions")
 	log.Println(rows)
