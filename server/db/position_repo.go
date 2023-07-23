@@ -141,13 +141,19 @@ func (r *PositionRepo) ClosePosition(id int32, closePrice float64) (*model.Close
 	if err != nil {
 		return nil, err
 	}
+	closePositionQuery := `
+		UPDATE positions
+		SET close_price = $1, profit = ($1 - price) * quantity, closed_at = CURRENT_TIMESTAMP
+		WHERE id = $2
+		RETURNING id, portfolio_id, ticker, price, quantity, opened_at, close_price, closed_at, profit`
+
+	updatePorfolioAmountQuery := `
+		UPDATE money
+    	SET amount = amount + $1 
+    	WHERE portfolio_id = $2`
 
 	positionRow := tx.QueryRow(
-		`
-					UPDATE positions
-					SET close_price = $1, profit = ($1 - price) * quantity, closed_at = CURRENT_TIMESTAMP
-					WHERE id = $2
-					RETURNING id, portfolio_id, ticker, price, quantity, opened_at, close_price, closed_at, profit`,
+		closePositionQuery,
 		closePrice,
 		id,
 	)
@@ -175,9 +181,7 @@ func (r *PositionRepo) ClosePosition(id int32, closePrice float64) (*model.Close
 		return nil, err
 	}
 	_, err = tx.Exec(
-		`UPDATE money
-    			SET amount = amount + $1 
-    			WHERE portfolio_id = $2`,
+		updatePorfolioAmountQuery,
 		closedPosition.Profit,
 		closedPosition.PortfolioID,
 	)
@@ -187,9 +191,6 @@ func (r *PositionRepo) ClosePosition(id int32, closePrice float64) (*model.Close
 		if err != nil {
 			return nil, err
 		}
-		return nil, err
-	}
-	if err != nil {
 		return nil, err
 	}
 	return closedPosition, nil

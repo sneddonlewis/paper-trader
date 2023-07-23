@@ -36,7 +36,7 @@ func (r *PositionResource) GetClosedPositions(c *gin.Context) {
 		SendErr(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, positions)
+	c.JSON(http.StatusOK, MapClosedPositionViewSlice(positions))
 }
 
 func (r *PositionResource) GetOpenPositions(c *gin.Context) {
@@ -76,7 +76,7 @@ func (r *PositionResource) ClosePosition(c *gin.Context) {
 		SendErr(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, closingPosition)
+	c.JSON(http.StatusOK, MapClosedPositionView(closingPosition))
 }
 
 func getIdParam(c *gin.Context, param string) (int32, error) {

@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"paper-trader/db"
-	"paper-trader/model"
 	"strconv"
 )
 
@@ -32,44 +31,11 @@ func (r *PortfolioResource) GetPortfolioByID(c *gin.Context) {
 	id := int32(id64)
 
 	portfolio, err := r.portfolioRepo.GetPortfolioById(id)
-	portfolioView := mapPortfolioView(portfolio)
+	portfolioView := MapPortfolioView(portfolio)
 	if err != nil {
 		SendErr(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	c.JSON(http.StatusOK, portfolioView)
-}
-
-func mapPortfolioView(portfolio *model.Portfolio) *model.PortfolioView {
-	return &model.PortfolioView{
-		ID:              portfolio.ID,
-		UserID:          portfolio.UserID,
-		Name:            portfolio.Name,
-		Value:           portfolio.Value,
-		OpenPositions:   portfolio.OpenPositions,
-		ClosedPositions: toClosedPositionViewSlice(portfolio.ClosedPositions),
-	}
-}
-
-func toClosedPositionViewSlice(closedPositions []*model.ClosedPosition) []*model.ClosedPositionView {
-	var closedPositionViews []*model.ClosedPositionView
-
-	for _, closedPosition := range closedPositions {
-		closedPositionView := &model.ClosedPositionView{
-			ID:          closedPosition.ID,
-			PortfolioID: closedPosition.PortfolioID,
-			Ticker:      closedPosition.Ticker,
-			Price:       closedPosition.Price,
-			Quantity:    closedPosition.Quantity,
-			OpenedAt:    closedPosition.OpenedAt,
-			ClosedAt:    closedPosition.ClosedAt,
-			ClosePrice:  closedPosition.ClosePrice.Float64,
-			Profit:      closedPosition.Profit.Float64,
-		}
-
-		closedPositionViews = append(closedPositionViews, closedPositionView)
-	}
-
-	return closedPositionViews
 }
