@@ -35,7 +35,7 @@ func (r *PositionRepo) GetOpenPositions() ([]*model.Position, error) {
 }
 
 func (r *PositionRepo) GetClosedPositions() ([]*model.ClosedPosition, error) {
-	rows, err := r.db.Query("SELECT id, ticker, price, quantity, opened_at, close_price, closed_at FROM positions WHERE close_price IS NOT NULL")
+	rows, err := r.db.Query("SELECT id, ticker, price, quantity, opened_at, close_price, closed_at, profit FROM positions WHERE close_price IS NOT NULL")
 	if err != nil {
 		return nil, err
 	}
@@ -50,6 +50,7 @@ func (r *PositionRepo) GetClosedPositions() ([]*model.ClosedPosition, error) {
 			&position.OpenedAt,
 			&position.ClosePrice,
 			&position.ClosedAt,
+			&position.Profit,
 		)
 		if err != nil {
 			return nil, err
@@ -127,7 +128,10 @@ func (r *PositionRepo) OpenPosition(p *model.Position) (*model.Position, error) 
 
 func (r *PositionRepo) ClosePosition(id int32, closePrice float64) (*model.ClosedPosition, error) {
 	row := r.db.QueryRow(
-		"UPDATE positions SET close_price = $1, closed_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id, ticker, price, quantity, close_price, closed_at",
+		`UPDATE positions
+				SET close_price = $1, profit = ($1 - price) * quantity, closed_at = CURRENT_TIMESTAMP
+				WHERE id = $2
+				RETURNING id, ticker, price, quantity, close_price, closed_at, profit`,
 		closePrice,
 		id,
 	)
@@ -139,6 +143,7 @@ func (r *PositionRepo) ClosePosition(id int32, closePrice float64) (*model.Close
 		&closedPosition.Quantity,
 		&closedPosition.ClosePrice,
 		&closedPosition.ClosedAt,
+		&closedPosition.Profit,
 	)
 	if err != nil {
 		return nil, err

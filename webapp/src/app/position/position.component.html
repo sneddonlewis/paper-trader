@@ -16,5 +16,6 @@
     <p>Open Price: {{ cp.price }}</p>
     <p>Close Price: {{ cp['close-price'] }}</p>
     <p>Quantity: {{ cp.quantity < 0 ? cp.quantity * -1 : cp.quantity }}</p>
+    <p>P&L: {{ cp.profit }} GBP</p>
   </li>
 </ul>

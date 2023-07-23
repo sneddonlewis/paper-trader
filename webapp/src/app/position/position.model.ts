@@ -9,4 +9,5 @@ export interface Position {
 export interface ClosedPosition extends Position {
   'closed-at': string,
   'close-price': number,
+  profit: number,
 }

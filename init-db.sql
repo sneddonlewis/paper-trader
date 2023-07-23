@@ -2,13 +2,14 @@ DROP TABLE IF EXISTS positions;
 
 CREATE TABLE positions
 (
-    id        SERIAL PRIMARY KEY,
-    ticker    VARCHAR(255),
-    price     DOUBLE PRECISION,
-    quantity  DOUBLE PRECISION,
+    id          SERIAL PRIMARY KEY,
+    ticker      VARCHAR(255),
+    price       DOUBLE PRECISION,
+    quantity    DOUBLE PRECISION,
     close_price DOUBLE PRECISION,
-    opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    closed_at   TIMESTAMP
+    opened_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    closed_at   TIMESTAMP,
+    profit      DOUBLE PRECISION
 );
 
 INSERT INTO positions (ticker, price, quantity)
