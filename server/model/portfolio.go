@@ -8,3 +8,12 @@ type Portfolio struct {
 	OpenPositions   []*Position       `json:"open-positions"`
 	ClosedPositions []*ClosedPosition `json:"closed-positions"`
 }
+
+type PortfolioView struct {
+	ID              int32                 `json:"id"`
+	UserID          int32                 `json:"user_id"`
+	Name            string                `json:"name"`
+	Value           float64               `json:"value"`
+	OpenPositions   []*Position           `json:"open-positions"`
+	ClosedPositions []*ClosedPositionView `json:"closed-positions"`
+}

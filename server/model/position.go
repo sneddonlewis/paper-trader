@@ -31,7 +31,8 @@ type ClosedPosition struct {
 	ClosedAt    *time.Time      `json:"closed-at"`
 	Profit      sql.NullFloat64 `json:"profit"`
 }
-type ClosedPositionResponse struct {
+
+type ClosedPositionView struct {
 	ID          int32      `json:"id"`
 	PortfolioID int32      `json:"portfolio_id"`
 	Ticker      string     `json:"ticker"`

@@ -32,32 +32,44 @@ func (r *PortfolioResource) GetPortfolioByID(c *gin.Context) {
 	id := int32(id64)
 
 	portfolio, err := r.portfolioRepo.GetPortfolioById(id)
+	portfolioView := mapPortfolioView(portfolio)
 	if err != nil {
 		SendErr(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, portfolio)
+	c.JSON(http.StatusOK, portfolioView)
 }
 
-func toClosedPositionResponse(closedPosition *model.ClosedPosition) *model.ClosedPositionResponse {
-	closedPositionResponse := &model.ClosedPositionResponse{
-		ID:          closedPosition.ID,
-		PortfolioID: closedPosition.PortfolioID,
-		Ticker:      closedPosition.Ticker,
-		Price:       closedPosition.Price,
-		Quantity:    closedPosition.Quantity,
-		OpenedAt:    closedPosition.OpenedAt,
-		ClosedAt:    closedPosition.ClosedAt,
+func mapPortfolioView(portfolio *model.Portfolio) *model.PortfolioView {
+	return &model.PortfolioView{
+		ID:              portfolio.ID,
+		UserID:          portfolio.UserID,
+		Name:            portfolio.Name,
+		Value:           portfolio.Value,
+		OpenPositions:   portfolio.OpenPositions,
+		ClosedPositions: toClosedPositionViewSlice(portfolio.ClosedPositions),
+	}
+}
+
+func toClosedPositionViewSlice(closedPositions []*model.ClosedPosition) []*model.ClosedPositionView {
+	var closedPositionViews []*model.ClosedPositionView
+
+	for _, closedPosition := range closedPositions {
+		closedPositionView := &model.ClosedPositionView{
+			ID:          closedPosition.ID,
+			PortfolioID: closedPosition.PortfolioID,
+			Ticker:      closedPosition.Ticker,
+			Price:       closedPosition.Price,
+			Quantity:    closedPosition.Quantity,
+			OpenedAt:    closedPosition.OpenedAt,
+			ClosedAt:    closedPosition.ClosedAt,
+			ClosePrice:  closedPosition.ClosePrice.Float64,
+			Profit:      closedPosition.Profit.Float64,
+		}
+
+		closedPositionViews = append(closedPositionViews, closedPositionView)
 	}
 
-	if closedPosition.ClosePrice.Valid {
-		closedPositionResponse.ClosePrice = closedPosition.ClosePrice.Float64
-	}
-
-	if closedPosition.Profit.Valid {
-		closedPositionResponse.Profit = closedPosition.Profit.Float64
-	}
-
-	return closedPositionResponse
+	return closedPositionViews
 }
