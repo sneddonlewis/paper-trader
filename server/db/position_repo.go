@@ -131,7 +131,7 @@ func (r *PositionRepo) ClosePosition(id int32, closePrice float64) (*model.Close
 		`UPDATE positions
 				SET close_price = $1, profit = ($1 - price) * quantity, closed_at = CURRENT_TIMESTAMP
 				WHERE id = $2
-				RETURNING id, ticker, price, quantity, close_price, closed_at, profit`,
+				RETURNING id, ticker, price, quantity, opened_at, close_price, closed_at, profit`,
 		closePrice,
 		id,
 	)
@@ -141,6 +141,7 @@ func (r *PositionRepo) ClosePosition(id int32, closePrice float64) (*model.Close
 		&closedPosition.Ticker,
 		&closedPosition.Price,
 		&closedPosition.Quantity,
+		&closedPosition.OpenedAt,
 		&closedPosition.ClosePrice,
 		&closedPosition.ClosedAt,
 		&closedPosition.Profit,
