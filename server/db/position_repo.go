@@ -63,7 +63,9 @@ func (r *PositionRepo) GetClosedPositions(portfolioId int32) ([]*model.ClosedPos
 }
 
 func (r *PositionRepo) GetPositions() ([]*model.Position, error) {
-	rows, err := r.db.Query("select id, portfolio_id, ticker, price, quantity, opened_at from positions")
+	query := `
+select id, portfolio_id, ticker, price, quantity, opened_at from positions`
+	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -135,16 +137,30 @@ func (r *PositionRepo) OpenPosition(p *model.Position) (*model.Position, error) 
 }
 
 func (r *PositionRepo) ClosePosition(id int32, closePrice float64) (*model.ClosedPosition, error) {
-	row := r.db.QueryRow(
-		`UPDATE positions
-				SET close_price = $1, profit = ($1 - price) * quantity, closed_at = CURRENT_TIMESTAMP
-				WHERE id = $2
-				RETURNING id, portfolio_id, ticker, price, quantity, opened_at, close_price, closed_at, profit`,
+	tx, err := r.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	positionRow := tx.QueryRow(
+		`
+					UPDATE positions
+					SET close_price = $1, profit = ($1 - price) * quantity, closed_at = CURRENT_TIMESTAMP
+					WHERE id = $2
+					RETURNING id, portfolio_id, ticker, price, quantity, opened_at, close_price, closed_at, profit`,
 		closePrice,
 		id,
 	)
+	if err != nil {
+		err := tx.Rollback()
+		if err != nil {
+			return nil, err
+		}
+		return nil, err
+	}
+
 	closedPosition := new(model.ClosedPosition)
-	err := row.Scan(
+	err = positionRow.Scan(
 		&closedPosition.ID,
 		&closedPosition.PortfolioID,
 		&closedPosition.Ticker,
@@ -155,6 +171,24 @@ func (r *PositionRepo) ClosePosition(id int32, closePrice float64) (*model.Close
 		&closedPosition.ClosedAt,
 		&closedPosition.Profit,
 	)
+	if err != nil {
+		return nil, err
+	}
+	_, err = tx.Exec(
+		`UPDATE money
+    			SET amount = amount + $1 
+    			WHERE portfolio_id = $2`,
+		closedPosition.Profit,
+		closedPosition.PortfolioID,
+	)
+	err = tx.Commit()
+	if err != nil {
+		err = tx.Rollback()
+		if err != nil {
+			return nil, err
+		}
+		return nil, err
+	}
 	if err != nil {
 		return nil, err
 	}
