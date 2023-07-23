@@ -20,6 +20,7 @@ type ClosedPosition struct {
 	Ticker     string    `json:"ticker"`
 	Price      float64   `json:"price"`
 	Quantity   float64   `json:"quantity"`
+	OpenedAt   time.Time `json:"opened-at"`
 	ClosePrice float64   `json:"close-price"`
 	ClosedAt   time.Time `json:"closed-at"`
 }

@@ -18,14 +18,24 @@ func NewPositionResource(tradeService *service.TradeService) *PositionResource {
 
 func (r *PositionResource) GetEndpoints() []Endpoint {
 	return []Endpoint{
-		{http.MethodGet, "/api/positions", r.GetPositions},
+		{http.MethodGet, "/api/positions", r.GetOpenPositions},
+		{http.MethodGet, "/api/positions/closed", r.GetClosedPositions},
 		{http.MethodPost, "/api/position/:id/close", r.ClosePosition},
 		{http.MethodPost, "/api/position", r.OpenPosition},
 	}
 }
 
-func (r *PositionResource) GetPositions(c *gin.Context) {
-	positions, err := r.tradeService.AllPositions()
+func (r *PositionResource) GetClosedPositions(c *gin.Context) {
+	positions, err := r.tradeService.GetClosedPositions()
+	if err != nil {
+		SendErr(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, positions)
+}
+
+func (r *PositionResource) GetOpenPositions(c *gin.Context) {
+	positions, err := r.tradeService.GetOpenPositions()
 	if err != nil {
 		SendErr(c, http.StatusInternalServerError, err.Error())
 		return

@@ -18,7 +18,6 @@ func NewPositionRepo(db *sql.DB) PositionRepo {
 
 func (r *PositionRepo) GetOpenPositions() ([]*model.Position, error) {
 	rows, err := r.db.Query("SELECT id, ticker, price, quantity, opened_at FROM positions WHERE close_price IS NULL")
-	log.Println(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +31,31 @@ func (r *PositionRepo) GetOpenPositions() ([]*model.Position, error) {
 		}
 		positions = append(positions, position)
 	}
-	log.Println(positions)
+	return positions, nil
+}
+
+func (r *PositionRepo) GetClosedPositions() ([]*model.ClosedPosition, error) {
+	rows, err := r.db.Query("SELECT id, ticker, price, quantity, opened_at, close_price, closed_at FROM positions WHERE close_price IS NOT NULL")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var positions []*model.ClosedPosition
+	for rows.Next() {
+		position := new(model.ClosedPosition)
+		err = rows.Scan(&position.ID,
+			&position.Ticker,
+			&position.Price,
+			&position.Quantity,
+			&position.OpenedAt,
+			&position.ClosePrice,
+			&position.ClosedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		positions = append(positions, position)
+	}
 	return positions, nil
 }
 

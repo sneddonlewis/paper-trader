@@ -11,30 +11,47 @@ export class PositionService {
 
   constructor(private readonly httpClient: HttpClient) { }
 
-  private positions: Position[] = [];
-  private positionSubject = new Subject<Position[]>();
+  private openPositions: Position[] = [];
+  private closedPositions: ClosedPosition[] = [];
 
-  getPositionObservable(): Observable<Position[]> {
-    return this.positionSubject.asObservable();
+  private openPositionsSubject= new Subject<Position[]>();
+  private closedPositionsSubject= new Subject<ClosedPosition[]>();
+
+  getOpenPositionsObservable(): Observable<Position[]> {
+    return this.openPositionsSubject.asObservable();
   }
 
-  getPositions(): Observable<Position[]> {
+  getClosedPositionsObservable(): Observable<ClosedPosition[]> {
+    return this.closedPositionsSubject.asObservable();
+  }
+
+  getOpenPositions(): Observable<Position[]> {
     return this.httpClient.get<Position[]>(`${environment.apiUrl}/api/positions`)
       .pipe(
         tap((p: Position[]) => {
-          this.positions = p;
-          this.positionSubject.next(this.positions);
-          console.log(p);
+          this. openPositions = p;
+          this.openPositionsSubject.next(this.openPositions);
         })
       );
   }
 
+  getClosedPositions(): Observable<ClosedPosition[]> {
+    return this.httpClient.get<ClosedPosition[]>(`${environment.apiUrl}/api/positions/closed`)
+      .pipe(
+        tap((cp: ClosedPosition[]) => {
+          this.closedPositions = cp;
+          this.closedPositionsSubject.next(this.closedPositions);
+        })
+      );
+  }
   closePosition(id: number): Observable<ClosedPosition> {
     return this.httpClient.post<ClosedPosition>(`${environment.apiUrl}/api/position/${id}/close`, {})
       .pipe(
         tap((cp: ClosedPosition) => {
-          this.positions = this.positions.filter(p => p.id !== cp.id)
-          this.positionSubject.next(this.positions);
+          this.openPositions = this.openPositions.filter(p => p.id !== cp.id)
+          this.openPositionsSubject.next(this.openPositions);
+          this.closedPositions === null ? this.closedPositions = [cp] : this.closedPositions.push(cp)
+          this.closedPositionsSubject.next(this.closedPositions);
         })
       );
   }
