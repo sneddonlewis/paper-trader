@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"paper-trader/model"
+	"time"
 )
 
 type PortfolioRepo struct {
@@ -25,12 +26,85 @@ func (r *PortfolioRepo) CreatePortfolio(userId int32, name string) (*model.Portf
 }
 
 func (r *PortfolioRepo) GetPortfolioById(id int32) (*model.Portfolio, error) {
-	portfolio := new(model.Portfolio)
-	err := r.db.QueryRow("SELECT id, user_id, name FROM portfolios WHERE id = $1", id).Scan(&portfolio.ID, &portfolio.UserID, &portfolio.Name)
+	p := new(model.Portfolio)
+
+	query := `
+        SELECT 
+            p.id AS portfolio_id, 
+            p.user_id, 
+            p.name,
+            pos.id AS position_id,
+            pos.ticker,
+            pos.price,
+            pos.quantity,
+            pos.opened_at,
+            pos.close_price,
+            pos.closed_at,
+            pos.profit
+        FROM 
+            portfolios p
+        LEFT JOIN 
+            positions pos ON p.id = pos.portfolio_id
+        WHERE 
+            p.id = $1
+    `
+
+	rows, err := r.db.Query(query, id)
 	if err != nil {
 		return nil, err
 	}
-	return portfolio, nil
+	defer rows.Close()
+
+	for rows.Next() {
+		var portfolioID, positionID int32
+		var ticker string
+		var price, quantity float64
+		var closePrice, profit sql.NullFloat64
+		var openedAt, closedAt *time.Time
+
+		err := rows.Scan(
+			&portfolioID,
+			&p.UserID,
+			&p.Name,
+			&positionID,
+			&ticker,
+			&price,
+			&quantity,
+			&openedAt,
+			&closePrice,
+			&closedAt,
+			&profit,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if closedAt == nil {
+			closedPosition := &model.ClosedPosition{
+				ID:         positionID,
+				Ticker:     ticker,
+				Price:      price,
+				Quantity:   quantity,
+				OpenedAt:   openedAt,
+				ClosePrice: closePrice,
+				ClosedAt:   closedAt,
+				Profit:     profit,
+			}
+			p.ClosedPositions = append(p.ClosedPositions, closedPosition)
+		} else {
+			openPosition := &model.Position{
+				ID:       positionID,
+				Ticker:   ticker,
+				Price:    price,
+				Quantity: quantity,
+				OpenedAt: openedAt,
+			}
+			p.OpenPositions = append(p.OpenPositions, openPosition)
+		}
+
+	}
+
+	return p, nil
 }
 
 func (r *PortfolioRepo) GetPortfoliosByUserId(userId int32) ([]*model.Portfolio, error) {

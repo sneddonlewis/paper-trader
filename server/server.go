@@ -20,10 +20,12 @@ func main() {
 	cors := os.Getenv("profile") == "prod"
 
 	positionRepo := db.NewPositionRepo(d)
+	portfolioRepo := db.NewPortfolioRepo(d)
 	tradeService := service.NewTradeService(positionRepo, service.PricingService{})
 	positionResource := web.NewPositionResource(tradeService)
 	resources := []web.Resource{
 		positionResource,
+		web.NewPortfolioResource(&portfolioRepo),
 	}
 	app := web.NewApp(db.NewDB(d), resources, cors)
 	err = app.Serve()
