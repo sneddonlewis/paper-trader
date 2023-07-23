@@ -26,7 +26,7 @@ export class PositionService {
   }
 
   getOpenPositions(): Observable<Position[]> {
-    return this.httpClient.get<Position[]>(`${environment.apiUrl}/api/positions`)
+    return this.httpClient.get<Position[]>(`${environment.apiUrl}/api/positions/1`)
       .pipe(
         tap((p: Position[]) => {
           this. openPositions = p;
@@ -36,7 +36,7 @@ export class PositionService {
   }
 
   getClosedPositions(): Observable<ClosedPosition[]> {
-    return this.httpClient.get<ClosedPosition[]>(`${environment.apiUrl}/api/positions/closed`)
+    return this.httpClient.get<ClosedPosition[]>(`${environment.apiUrl}/api/positions/1/closed`)
       .pipe(
         tap((cp: ClosedPosition[]) => {
           this.closedPositions = cp;

@@ -34,8 +34,9 @@ func (r *PositionRepo) GetOpenPositions() ([]*model.Position, error) {
 	return positions, nil
 }
 
-func (r *PositionRepo) GetClosedPositions() ([]*model.ClosedPosition, error) {
-	rows, err := r.db.Query("SELECT id, ticker, price, quantity, opened_at, close_price, closed_at, profit FROM positions WHERE close_price IS NOT NULL")
+func (r *PositionRepo) GetClosedPositions(portfolioId int32) ([]*model.ClosedPosition, error) {
+	rows, err := r.db.Query("SELECT id, ticker, price, quantity, opened_at, close_price, closed_at, profit FROM positions WHERE close_price IS NOT NULL AND portfolio_id = $1",
+		portfolioId)
 	if err != nil {
 		return nil, err
 	}

@@ -18,8 +18,8 @@ func NewTradeService(positionRepo db.PositionRepo, pricing PricingService) *Trad
 	}
 }
 
-func (s *TradeService) GetClosedPositions() ([]*model.ClosedPosition, error) {
-	return s.positionRepo.GetClosedPositions()
+func (s *TradeService) GetClosedPositions(portfolioId int32) ([]*model.ClosedPosition, error) {
+	return s.positionRepo.GetClosedPositions(portfolioId)
 }
 
 func (s *TradeService) GetOpenPositions() ([]*model.Position, error) {
