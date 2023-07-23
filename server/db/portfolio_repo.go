@@ -79,7 +79,7 @@ func (r *PortfolioRepo) GetPortfolioById(id int32) (*model.Portfolio, error) {
 			return nil, err
 		}
 
-		if closedAt == nil {
+		if closedAt != nil {
 			closedPosition := &model.ClosedPosition{
 				ID:         positionID,
 				Ticker:     ticker,

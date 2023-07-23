@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"paper-trader/db"
+	"paper-trader/model"
 	"strconv"
 )
 
@@ -37,4 +38,26 @@ func (r *PortfolioResource) GetPortfolioByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, portfolio)
+}
+
+func toClosedPositionResponse(closedPosition *model.ClosedPosition) *model.ClosedPositionResponse {
+	closedPositionResponse := &model.ClosedPositionResponse{
+		ID:          closedPosition.ID,
+		PortfolioID: closedPosition.PortfolioID,
+		Ticker:      closedPosition.Ticker,
+		Price:       closedPosition.Price,
+		Quantity:    closedPosition.Quantity,
+		OpenedAt:    closedPosition.OpenedAt,
+		ClosedAt:    closedPosition.ClosedAt,
+	}
+
+	if closedPosition.ClosePrice.Valid {
+		closedPositionResponse.ClosePrice = closedPosition.ClosePrice.Float64
+	}
+
+	if closedPosition.Profit.Valid {
+		closedPositionResponse.Profit = closedPosition.Profit.Float64
+	}
+
+	return closedPositionResponse
 }
