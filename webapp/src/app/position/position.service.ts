@@ -12,16 +12,16 @@ export class PositionService {
   constructor(private readonly httpClient: HttpClient) { }
 
   private openPositions: Position[] = [];
-  private closedPositions: ClosedPosition[] = [];
+  private closedPositions: Map<number, ClosedPosition[]> = new Map();
 
   private openPositionsSubject= new Subject<Position[]>();
-  private closedPositionsSubject= new Subject<ClosedPosition[]>();
+  private closedPositionsSubject= new Subject<Map<number, ClosedPosition[]>>();
 
   getOpenPositionsObservable(): Observable<Position[]> {
     return this.openPositionsSubject.asObservable();
   }
 
-  getClosedPositionsObservable(): Observable<ClosedPosition[]> {
+  getClosedPositionsObservable(): Observable<Map<number, ClosedPosition[]>> {
     return this.closedPositionsSubject.asObservable();
   }
 
@@ -35,11 +35,11 @@ export class PositionService {
       );
   }
 
-  getClosedPositions(): Observable<ClosedPosition[]> {
-    return this.httpClient.get<ClosedPosition[]>(`${environment.apiUrl}/api/positions/1/closed`)
+  getClosedPositions(portfolioId: number): Observable<ClosedPosition[]> {
+    return this.httpClient.get<ClosedPosition[]>(`${environment.apiUrl}/api/positions/${portfolioId}/closed`)
       .pipe(
         tap((cp: ClosedPosition[]) => {
-          this.closedPositions = cp;
+          this.closedPositions.set(portfolioId, cp);
           this.closedPositionsSubject.next(this.closedPositions);
         })
       );
@@ -49,8 +49,8 @@ export class PositionService {
       .pipe(
         tap((cp: ClosedPosition) => {
           this.openPositions = this.openPositions.filter(p => p.id !== cp.id)
-          this.openPositionsSubject.next(this.openPositions);
-          this.closedPositions === null ? this.closedPositions = [cp] : this.closedPositions.push(cp)
+          this.openPositionsSubject.next(this.openPositions)
+          // the closed positions are now out of date but we need to make sure this one gets put in the right map entry
           this.closedPositionsSubject.next(this.closedPositions);
         })
       );

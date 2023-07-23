@@ -10,7 +10,7 @@
 </ul>
 <h3>Closed Positions</h3>
 <ul>
-  <li *ngFor="let cp of closedPositions">
+  <li *ngFor="let cp of closedPositions.get(1)">
     <b>{{ cp.ticker }}</b>: <i>{{ cp['opened-at'] }}</i> : <i>{{ cp['closed-at'] }}</i>
     <p>Direction: {{ cp.quantity < 0 ? 'short' : 'long' }}</p>
     <p>Open Price: {{ cp.price }}</p>

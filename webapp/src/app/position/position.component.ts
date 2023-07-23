@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 export class PositionComponent implements OnInit, OnDestroy {
 
   positions: Position[] = [];
-  closedPositions: ClosedPosition[] = [];
+  closedPositions: Map<number, ClosedPosition[]> = new Map();
   private positionSubscription: Subscription | undefined;
   private closedPositionSubscription: Subscription | undefined;
 
@@ -20,9 +20,9 @@ export class PositionComponent implements OnInit, OnDestroy {
     this.positionSubscription = this.positionService.getOpenPositionsObservable()
       .subscribe(ps => this.positions = ps);
     this.closedPositionSubscription = this.positionService.getClosedPositionsObservable()
-      .subscribe(cps => this.closedPositions = cps);
+      .subscribe(portfolio => this.closedPositions = portfolio);
     this.positionService.getOpenPositions().subscribe();
-    this.positionService.getClosedPositions().subscribe();
+    this.positionService.getClosedPositions(1).subscribe();
   }
 
   ngOnDestroy(): void {
