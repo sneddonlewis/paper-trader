@@ -3,7 +3,7 @@
   <li *ngFor="let position of positions">
     <b>{{ position.ticker }}</b>: <i>{{ position['opened-at'] }}</i>
     <p>Direction: {{ position.quantity < 0 ? 'short' : 'long' }}</p>
-    <p>Price: {{ position.price }}</p>
+    <p>Open Price: {{ position.price }}</p>
     <p>Quantity: {{ position.quantity < 0 ? position.quantity * -1 : position.quantity }}</p>
     <button (click)="closePositionHandler(position.id)">Close Position</button>
   </li>
@@ -13,7 +13,7 @@
   <li *ngFor="let cp of closedPositions">
     <b>{{ cp.ticker }}</b>: <i>{{ cp['opened-at'] }}</i> : <i>{{ cp['closed-at'] }}</i>
     <p>Direction: {{ cp.quantity < 0 ? 'short' : 'long' }}</p>
-    <p>Price: {{ cp.price }}</p>
+    <p>Open Price: {{ cp.price }}</p>
     <p>Close Price: {{ cp['close-price'] }}</p>
     <p>Quantity: {{ cp.quantity < 0 ? cp.quantity * -1 : cp.quantity }}</p>
   </li>
