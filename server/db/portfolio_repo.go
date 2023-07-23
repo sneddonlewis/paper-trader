@@ -33,6 +33,7 @@ func (r *PortfolioRepo) GetPortfolioById(id int32) (*model.Portfolio, error) {
             p.id AS portfolio_id, 
             p.user_id, 
             p.name,
+            m.amount,
             pos.id AS position_id,
             pos.ticker,
             pos.price,
@@ -45,6 +46,8 @@ func (r *PortfolioRepo) GetPortfolioById(id int32) (*model.Portfolio, error) {
             portfolios p
         LEFT JOIN 
             positions pos ON p.id = pos.portfolio_id
+        LEFT JOIN
+            money m ON p.id = m.portfolio_id
         WHERE 
             p.id = $1
     `
@@ -66,6 +69,7 @@ func (r *PortfolioRepo) GetPortfolioById(id int32) (*model.Portfolio, error) {
 			&portfolioID,
 			&p.UserID,
 			&p.Name,
+			&p.Value,
 			&positionID,
 			&ticker,
 			&price,
