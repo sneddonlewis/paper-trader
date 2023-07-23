@@ -4,7 +4,7 @@ export interface Portfolio {
   id: number;
   userID: number;
   name: string;
-  value: number;
+  value: number; // TODO rename this amount or cash, value includes unrealised P&L
   openPositions: Position[];
   closedPositions: ClosedPosition[];
 }
